@@ -64,7 +64,7 @@ export function useProductSearch(products: Product[]) {
 
       // Prep Time
       if (advancedFilters.prepTime !== "any") {
-        const time = product.preparationTimeLines || 0;
+        const time = product.preparationTime || 0;
         if (advancedFilters.prepTime === "fast" && time >= 15) return false;
         if (advancedFilters.prepTime === "medium" && (time < 15 || time > 30))
           return false;

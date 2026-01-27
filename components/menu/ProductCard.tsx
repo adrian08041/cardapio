@@ -41,9 +41,9 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
         </div>
 
         {/* Time Chip - Bottom Right */}
-        {product.preparationTimeLines && (
+        {product.preparationTime && (
           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-semibold text-black shadow-sm">
-            <Clock size={10} /> {product.preparationTimeLines} min
+            <Clock size={10} /> {product.preparationTime} min
           </div>
         )}
       </div>

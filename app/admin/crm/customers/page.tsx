@@ -10,7 +10,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     id: "1",
     name: "Ana Silva",
     phone: "(11) 99999-1234",
-    address: [], // Simplificado para listagem
+    addresses: [], // Simplificado para listagem
     metrics: {
       totalOrders: 15,
       totalSpent: 1250,
@@ -25,8 +25,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     },
     status: "active",
     tags: ["vip", "lunch-lover"],
-    metrics: { totalOrders: 15, totalSpent: 1250, averageTicket: 83.33 },
-    addresses: [],
+
     createdAt: "2023-01-10",
   },
   {

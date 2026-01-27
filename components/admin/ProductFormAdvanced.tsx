@@ -72,7 +72,7 @@ const availabilityTypes = [
   { value: "always", label: "Sempre Disponível" },
   { value: "specific_days", label: "Dias Específicos" },
   { value: "specific_hours", label: "Horários Específicos" },
-];
+] as const;
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -236,7 +236,7 @@ export function ProductFormAdvanced({
         unit: data.stockUnit,
       },
       availability: {
-        type: availabilityType as any,
+        type: availabilityType,
         days: selectedDays,
         startTime: data.startTime,
         endTime: data.endTime,

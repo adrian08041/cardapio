@@ -26,9 +26,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
   const { register, handleSubmit } = useForm({
     defaultValues: product || {
       name: "",
-      price: "",
+      price: 0,
       description: "",
-      imageUrl: "",
+      image: "",
     },
   });
 

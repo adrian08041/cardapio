@@ -73,10 +73,10 @@ export function ProductDetailsModal({
                   <DialogTitle className="text-2xl font-bold">
                     {product.name}
                   </DialogTitle>
-                  {product.preparationTimeLines && (
+                  {product.preparationTime && (
                     <div className="flex items-center text-xs text-[var(--color-muted-foreground)]">
                       <Clock size={12} className="mr-1" />
-                      Preparo: {product.preparationTimeLines} min
+                      Preparo: {product.preparationTime} min
                     </div>
                   )}
                 </div>
