@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
+
+  /* Brand Palette: High Contrast Red & Gray */
+
+  --color-background: #f6f6f6; /* Off-White Background */
+  --color-foreground: #333333; /* Dark Jet Text */
+
+  --color-card: #ffffff; /* Inferred White for cards to pop against F6F6F6 */
+  --color-card-foreground: #333333;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #333333;
+
+  /* Primary: Deep Crimson */
+  --color-primary: #990100;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary: Platinum Gray */
+  --color-secondary: #e8e8e8;
+  --color-secondary-foreground: #333333;
+
+  --color-muted: #e8e8e8;
+  --color-muted-foreground: #666666; /* lighter text derived */
+
+  /* Accent: Bright Vibrate Red */
+  --color-accent: #b90504;
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #990100;
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #e8e8e8;
+  --color-input: #e8e8e8;
+  --color-ring: #b90504;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer utilities {
+  /* --- PREMIUM VISUAL SYSTEM --- */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Soft, heavy diffused shadow for depth (Elevated feel) */
+  .shadow-premium {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Refined Glass Panel */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  /* Card Interaction & Polish */
+  .enterprise-card {
+    background: var(--color-card);
+    border: 1px solid transparent; /* Cleaner initial state */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle base shadow */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .enterprise-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.08),
+      0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    border-color: rgba(0,0,0,0.05);
+  }
+
+  /* Modern Input Field (No hard borders by default) */
+  .input-premium {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+  }
+
+  .input-premium:focus {
+    background: #FFFFFF;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(153, 1, 0, 0.1); /* Primary color ring with opacity */
+    outline: none;
+  }
+
+  /* Hide Scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+

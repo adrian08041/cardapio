@@ -1,0 +1,76 @@
+"use client";
+
+import { useDrag, useDrop } from "react-dnd";
+import { Order, OrderStatus } from "@/types/order";
+import { cn, formatCurrency } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Clock, MapPin, ShoppingBag, User } from "lucide-react";
+
+interface OrderCardProps {
+  order: Order;
+  index: number;
+  moveOrder?: (id: string, toStatus: OrderStatus) => void;
+}
+
+// Em um app real, usaríamos react-dnd, mas para simplificar e garantir
+// que funcione sem setup complexo de Providers agora, faremos visualização em card simples.
+// Se o usuário quiser Drag & Drop real, implementamos em seguida.
+
+export function OrderCard({ order }: OrderCardProps) {
+  const statusColors = {
+    pending: "border-l-4 border-l-yellow-500",
+    preparing: "border-l-4 border-l-orange-500",
+    ready: "border-l-4 border-l-green-500",
+    delivered: "border-l-4 border-l-gray-500 opacity-60",
+    cancelled: "border-l-4 border-l-red-500 opacity-60",
+  };
+
+  return (
+    <div
+      className={cn(
+        "bg-[var(--color-card)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 shadow-sm hover:shadow-md transition-all cursor-pointer",
+        statusColors[order.status],
+      )}
+    >
+      <div className="flex justify-between items-start mb-3">
+        <h4 className="font-bold text-lg">#{order.id.slice(0, 4)}</h4>
+        <span className="text-xs font-mono text-gray-500">
+          {order.createdAt.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 mb-3 text-sm text-[var(--color-muted-foreground)]">
+        <User size={14} className="text-[var(--color-primary)]" />
+        <span className="font-medium truncate">{order.customerName}</span>
+      </div>
+
+      <div className="space-y-2 mb-4 border-y border-[var(--color-border)]/50 py-3">
+        {order.items.map((item, idx) => (
+          <div key={idx} className="flex gap-2 text-sm">
+            <span className="font-bold text-[var(--color-primary)] w-4">
+              {item.quantity}x
+            </span>
+            <span className="text-[var(--color-foreground)] line-clamp-1">
+              {item.name}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex justify-between items-center mt-2">
+        <Badge
+          variant={order.type === "delivery" ? "secondary" : "outline"}
+          className="text-xs"
+        >
+          {order.type === "delivery" ? "🛵 Delivery" : "🏪 Retirada"}
+        </Badge>
+        <span className="font-bold text-[var(--color-primary)]">
+          {formatCurrency(order.total)}
+        </span>
+      </div>
+    </div>
+  );
+}

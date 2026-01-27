@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍔 Cardápio Pro | Enterprise
 
-## Getting Started
+> **A solução definitiva para operações de Food Service de alta performance.**  
+> _Cardápio Digital • KDS Industrial • Gestão 360º_
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-cyan)](https://tailwindcss.com/) [![Status](https://img.shields.io/badge/Status-Production%20Ready-green)]()
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Sobre o Projeto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+O **Cardápio Pro** não é apenas um site de pedidos. É uma **plataforma completa de gestão operacional** desenhada para hamburguerias e restaurantes que buscam eficiência máxima e uma experiência de usuário (UX) de nível mundial.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Construído com uma arquitetura moderna (**Next.js App Router**), o sistema oferece performance instantânea, SEO otimizado e uma interface "High Contrast Design" que garante legibilidade em qualquer ambiente, da cozinha escura à luz do sol.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## ✨ Funcionalidades Principais
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📱 Para o Cliente (Storefront)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Uma experiência de compra fluida e viciante.
 
-## Deploy on Vercel
+- **Hero Section Imersivo:** Design moderno com busca integrada e navegação intuitiva.
+- **Cardápio Interativo:** Filtros por categoria, busca em tempo real e fotos em alta definição.
+- **Carrinho Inteligente:** Gestão de pedidos, cupons de desconto e checkout otimizado (Side Drawer).
+- **Programa de Fidelidade:** Sistema de pontos e recompensas integrado ao perfil do usuário.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 👨‍🍳 Para a Operação (KDS - Kitchen Display System)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Adeus às impressoras de papel. Bem-vindo à eficiência digital.
+
+- **Painel Industrial:** Interface de alto contraste desenhada para telas de cozinha.
+- **Gestão de Filas:** Colunas de "Novos", "Em Preparo" e "Prontos" com Drag-and-Drop.
+- **Alertas Visuais:** Cores semafóricas (Verde/Amarelo/Vermelho) para indicar atrasos.
+- **Modo Cozinha/Bar:** Filtragem de pedidos por estação de trabalho.
+
+### 📊 Para o Gestor (Admin Dashboard)
+
+Controle total do seu negócio em uma única tela.
+
+- **Gestão de Produtos:** CRUD completo com upload de imagens e controle de estoque.
+- **Categorias Dinâmicas:** Organização flexível do cardápio via Drag-and-Drop.
+- **CRM Avançado:** Histórico de clientes, LTV (Lifetime Value) e risco de Churn.
+- **Configurações Globais:** Controle de horários, áreas de entrega, taxas e impressoras térmicas.
+
+---
+
+## 🎨 Design System & UI
+
+Utilizamos uma identidade visual **"High Contrast Red/Gray"**, focada em:
+
+- **Legibilidade Extrema:** Tipografia Inter e contrastes calculados para acessibilidade.
+- **Micro-interações:** Animações sutis (Framer Motion) que guiam o usuário sem distrações.
+- **Performance First:** Componentes carregados sob demanda (Lazy Loading) para máxima velocidade.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+Projetado para escalabilidade e manutenção a longo prazo:
+
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript.
+- **Estilização:** Tailwind CSS v4 (Variáveis Semânticas), Lucide Icons.
+- **Estado:** Zustand (Gerenciamento global leve e rápido).
+- **Performance:** Dynamic Imports, Image Optimization, Server Components.
+
+---
+
+## 🔒 Segurança e Robustez
+
+- **Type-Safe:** 100% TypeScript para evitar erros em tempo de execução.
+- **Clean Code:** Arquitetura modular baseada em features.
+- **DDoS Protection:** Otimizado para Edge Runtime.
+
+---
+
+> Feito com 🍔 e muito código por **Adrian**.
+
