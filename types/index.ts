@@ -71,11 +71,14 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  image: string;
-  images?: string[]; // multiple images
-  categoryId: string;
+  promotionalPrice?: number; // Adicionado
+  image: string; // Backend manda imageUrl, vou mapear no client ou ajustar aqui. Backend: imageUrl. Frontend: image.
+  imageUrl?: string; // Adicionando para compatibilidade temporária
+  category?: { id: string; name: string; slug: string; icon: string }; // Mudança estrutural
+  // categoryId: string; // REMOVIDO
   rating?: number;
   preparationTime?: number; // em minutos
+  serves?: number; // Adicionado backend
   tags?: string[];
   dietaryInfo?: DietaryRestriction[];
   allergens?: Allergen[];
@@ -86,7 +89,7 @@ export interface Product {
   // New fields for admin
   sku?: string;
   stock?: ProductStock;
-  order?: number; // display order
+  displayOrder?: number; // era order
   relatedProductIds?: string[];
   addonGroupIds?: string[];
   availability?: ProductAvailability;

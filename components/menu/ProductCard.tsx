@@ -1,11 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { memo } from "react";
 import Image from "next/image";
 import { Product } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Clock } from "lucide-react";
 
 interface ProductCardProps {
@@ -13,15 +12,11 @@ interface ProductCardProps {
   onAdd: (product: Product) => void;
 }
 
-export function ProductCard({ product, onAdd }: ProductCardProps) {
+// Using React.memo to prevent unnecessary re-renders in lists
+function ProductCardComponent({ product, onAdd }: ProductCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      viewport={{ once: true }}
-      className="group flex flex-col h-full enterprise-card rounded-xl overflow-hidden cursor-pointer"
-    >
+    // Using CSS animation instead of framer-motion for better performance
+    <div className="group flex flex-col h-full enterprise-card rounded-xl overflow-hidden cursor-pointer animate-fade-in-up">
       {/* Image Section */}
       <div className="relative h-48 w-full bg-[var(--color-secondary)]/20 overflow-hidden">
         <Image
@@ -77,6 +72,9 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+// Memoize to prevent re-renders when parent updates but props don't change
+export const ProductCard = memo(ProductCardComponent);

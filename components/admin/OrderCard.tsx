@@ -7,22 +7,22 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin, ShoppingBag, User } from "lucide-react";
 
 interface OrderCardProps {
-  order: Order;
+  order: any;
   index: number;
-  moveOrder?: (id: string, toStatus: OrderStatus) => void;
+  onAction?: (action: string, orderId: string) => void;
 }
 
 // Em um app real, usaríamos react-dnd, mas para simplificar e garantir
 // que funcione sem setup complexo de Providers agora, faremos visualização em card simples.
 // Se o usuário quiser Drag & Drop real, implementamos em seguida.
 
-export function OrderCard({ order }: OrderCardProps) {
-  const statusColors = {
-    pending: "border-l-4 border-l-yellow-500",
-    preparing: "border-l-4 border-l-orange-500",
-    ready: "border-l-4 border-l-green-500",
-    delivered: "border-l-4 border-l-gray-500 opacity-60",
-    cancelled: "border-l-4 border-l-red-500 opacity-60",
+export function OrderCard({ order, onAction }: OrderCardProps) {
+  const statusColors: any = {
+    PENDING: "border-l-4 border-l-yellow-500",
+    PREPARING: "border-l-4 border-l-orange-500",
+    READY: "border-l-4 border-l-green-500",
+    DELIVERED: "border-l-4 border-l-gray-500 opacity-60",
+    CANCELLED: "border-l-4 border-l-red-500 opacity-60",
   };
 
   return (
@@ -35,7 +35,7 @@ export function OrderCard({ order }: OrderCardProps) {
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-bold text-lg">#{order.id.slice(0, 4)}</h4>
         <span className="text-xs font-mono text-gray-500">
-          {order.createdAt.toLocaleTimeString([], {
+          {new Date(order.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
@@ -70,6 +70,43 @@ export function OrderCard({ order }: OrderCardProps) {
         <span className="font-bold text-[var(--color-primary)]">
           {formatCurrency(order.total)}
         </span>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex gap-2 justify-end">
+        {order.status === "PENDING" && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction?.("prepare", order.id);
+            }}
+            className="px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded hover:bg-orange-700 w-full"
+          >
+            Iniciar Preparo
+          </button>
+        )}
+        {order.status === "PREPARING" && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction?.("ready", order.id);
+            }}
+            className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 w-full"
+          >
+            Marcar Pronto
+          </button>
+        )}
+        {order.status === "READY" && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction?.("deliver", order.id);
+            }}
+            className="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700 w-full"
+          >
+            Entregar
+          </button>
+        )}
       </div>
     </div>
   );

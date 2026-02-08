@@ -1,59 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { Order, OrderStatus } from "@/types/order";
+import { useState, useEffect } from "react";
+import { ordersApi } from "@/lib/api/orders";
 import { OrderCard } from "@/components/admin/OrderCard";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mock Data with fixed dates to avoid Hydration Mismatch
-const mockOrders: Order[] = [
-  {
-    id: "102030",
-    customerName: "Fernanda Costa",
-    status: "pending",
-    type: "delivery",
-    total: 89.9,
-    createdAt: new Date("2024-01-27T10:30:00"),
-    items: [
-      { id: "1", name: "X-Monstro Supremo", quantity: 2, price: 38.9 },
-      { id: "2", name: "Coca-Cola", quantity: 2, price: 6.0 },
-    ],
-  },
-  {
-    id: "102031",
-    customerName: "Bruno Lima",
-    status: "preparing",
-    type: "pickup",
-    total: 45.0,
-    createdAt: new Date("2024-01-27T11:15:00"),
-    items: [{ id: "3", name: "Pizza Calabresa", quantity: 1, price: 42.0 }],
-  },
-  {
-    id: "102032",
-    customerName: "Ana Silva",
-    status: "ready",
-    type: "delivery",
-    total: 24.5,
-    createdAt: new Date("2024-01-27T11:45:00"),
-    items: [{ id: "4", name: "Smash Classic", quantity: 1, price: 24.5 }],
-  },
-];
+// Mock Data removed
+const mockOrders: any[] = [];
 
-const columns: { id: OrderStatus; label: string; color: string }[] = [
-  { id: "pending", label: "Pendente", color: "bg-yellow-500" },
-  { id: "preparing", label: "Em Preparo", color: "bg-orange-500" },
-  { id: "ready", label: "Pronto", color: "bg-green-500" },
+const columns: { id: string; label: string; color: string }[] = [
+  { id: "PENDING", label: "Pendente", color: "bg-yellow-500" },
+  { id: "PREPARING", label: "Em Preparo", color: "bg-orange-500" },
+  { id: "READY", label: "Pronto", color: "bg-green-500" },
 ];
 
 export default function KitchenOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<any[]>([]);
 
-  // Simulating real-time refresh
-  const refresh = () => {
-    // In real app, this would refetch SWR/React Query
-    console.log("Refreshed!");
+  const refresh = async () => {
+    try {
+      const data = await ordersApi.getToday();
+      setOrders(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(refresh, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAction = async (action: any, orderId: string) => {
+    try {
+      await ordersApi.updateStatusHelper(orderId, action);
+      refresh();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao atualizar status");
+    }
   };
 
   return (
@@ -104,7 +92,12 @@ export default function KitchenOrdersPage() {
                   </div>
                 ) : (
                   columnOrders.map((order, index) => (
-                    <OrderCard key={order.id} order={order} index={index} />
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      index={index}
+                      onAction={handleAction}
+                    />
                   ))
                 )}
               </div>

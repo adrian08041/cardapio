@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart";
+import { useAuthStore } from "@/store/auth";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +37,16 @@ export default function CheckoutPage() {
   const [activeStep, setActiveStep] = useState(1);
   const [deliveryType, setDeliveryType] = useState("delivery");
   const [paymentMethod, setPaymentMethod] = useState("credit");
+  // Customer Data
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [address, setAddress] = useState({
+    zipCode: "",
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+  });
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Order Tracking State
@@ -50,12 +62,20 @@ export default function CheckoutPage() {
     text: string;
   } | null>(null);
 
+  const { user } = useAuthStore();
+
   useEffect(() => {
     setIsMounted(true);
     if (!confirmedOrder && items.length === 0) {
       router.push("/"); // Only redirect if not tracking an order
     }
-  }, [items, router, confirmedOrder]);
+
+    // Auto fill user data
+    if (user) {
+      setCustomerName(user.name);
+      if (user.phone) setCustomerPhone(user.phone);
+    }
+  }, [items, router, confirmedOrder, user]);
 
   // Simulate Order Progress
   useEffect(() => {
@@ -89,25 +109,19 @@ export default function CheckoutPage() {
     const code = couponInput.toUpperCase();
     if (code === "BEMVINDO10") {
       applyCoupon(code, subtotal * 0.1);
-      setCouponMessage({ type: "success", text: "Cupom de 10% aplicado!" });
+      toast.success("Cupom de 10% aplicado!");
     } else if (code === "FRETEGRATIS") {
       if (deliveryType !== "delivery") {
-        setCouponMessage({
-          type: "error",
-          text: "Válido apenas para entrega.",
-        });
+        toast.error("Válido apenas para entrega.");
         return;
       }
       applyCoupon(code, 5.0);
-      setCouponMessage({ type: "success", text: "Frete Grátis aplicado!" });
+      toast.success("Frete Grátis aplicado!");
     } else if (code === "DESC15") {
       applyCoupon(code, 15.0);
-      setCouponMessage({
-        type: "success",
-        text: "Desconto de R$ 15,00 aplicado!",
-      });
+      toast.success("Desconto de R$ 15,00 aplicado!");
     } else {
-      setCouponMessage({ type: "error", text: "Cupom inválido." });
+      toast.error("Cupom inválido.");
     }
   };
 
@@ -117,26 +131,59 @@ export default function CheckoutPage() {
     setCouponMessage(null);
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
+    if (!customerName || !customerPhone) {
+      toast.warning("Por favor, preencha nome e telefone.");
+      return;
+    }
+
     setIsProcessing(true);
 
-    // Capture current cart state before clearing
-    const orderData = {
-      id: Math.floor(Math.random() * 10000).toString(),
-      items: [...items],
-      total: finalTotal,
-      subtotal,
-      discount: discountAmount + pixDiscount,
-      deliveryType,
-      paymentMethod,
-      createdAt: new Date(),
-    };
+    try {
+      const orderData = {
+        customerName,
+        customerPhone,
+        deliveryAddress:
+          deliveryType === "delivery"
+            ? `${address.street}, ${address.number} - ${address.neighborhood}`
+            : undefined,
+        deliveryComplement: address.complement,
+        deliveryNeighborhood: address.neighborhood,
+        orderType: deliveryType === "delivery" ? "DELIVERY" : "PICKUP",
+        paymentMethod:
+          paymentMethod === "credit"
+            ? "CREDIT_CARD"
+            : paymentMethod === "pix"
+              ? "PIX"
+              : "CASH",
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          notes: item.notes,
+        })),
+        deliveryFee,
+        discount: discountAmount + pixDiscount,
+        couponCode,
+      };
 
-    setTimeout(() => {
-      setConfirmedOrder(orderData); // Save to local state for tracking
+      const { ordersApi } = await import("@/lib/api/orders");
+      const order = await ordersApi.create(orderData as any);
+
+      setConfirmedOrder({
+        ...order,
+        // Mapping backend order to UI expected format if needed, or using as is
+        total: finalTotal, // Use local calc for safe display or use backend provided total
+        items: [...items], // Keep items for display
+      });
+
+      toast.success("Pedido realizado com sucesso!");
+      clearCart();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao criar pedido. Tente novamente.");
+    } finally {
       setIsProcessing(false);
-      clearCart(); // Now safe to clear
-    }, 2000);
+    }
   };
 
   if (!isMounted) return null;
@@ -310,6 +357,31 @@ export default function CheckoutPage() {
       <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Forms */}
         <div className="lg:col-span-2 space-y-8">
+          {/* Customer Info */}
+          <section className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              👤 Seus Dados
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nome Completo</Label>
+                <Input
+                  placeholder="Seu nome"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Telefone / WhatsApp</Label>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+
           {/* Delivery Type */}
           <section className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -363,21 +435,55 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>CEP</Label>
-                    <Input placeholder="00000-000" />
+                    <Input
+                      placeholder="00000-000"
+                      value={address.zipCode}
+                      onChange={(e) =>
+                        setAddress({ ...address, zipCode: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Rua</Label>
-                    <Input placeholder="Av. Principal" />
+                    <Input
+                      placeholder="Av. Principal"
+                      value={address.street}
+                      onChange={(e) =>
+                        setAddress({ ...address, street: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Número</Label>
-                    <Input placeholder="123" />
+                    <Input
+                      placeholder="123"
+                      value={address.number}
+                      onChange={(e) =>
+                        setAddress({ ...address, number: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Complemento</Label>
-                    <Input placeholder="Apto 101" />
+                    <Input
+                      placeholder="Apto 101"
+                      value={address.complement}
+                      onChange={(e) =>
+                        setAddress({ ...address, complement: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label>Bairro</Label>
+                    <Input
+                      placeholder="Centro"
+                      value={address.neighborhood}
+                      onChange={(e) =>
+                        setAddress({ ...address, neighborhood: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
               </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,37 +12,63 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { formatCurrency, cn } from "@/lib/utils";
+import { ordersApi } from "@/lib/api/orders";
+import type { OrderStatus } from "@/types/order";
 
-// Mock Data for Recent Orders
-const recentOrders = [
-  {
-    id: "#1234",
-    customer: "João Silva",
-    total: 85.5,
-    status: "Preparando",
-    time: "10 min",
-  },
-  {
-    id: "#1233",
-    customer: "Maria Oliveira",
-    total: 42.0,
-    status: "Pronto",
-    time: "25 min",
-  },
-  {
-    id: "#1232",
-    customer: "Carlos Souza",
-    total: 120.9,
-    status: "Entregue",
-    time: "50 min",
-  },
-];
+// Helper function for status badge styling
+function getStatusStyle(status: string): string {
+  const normalizedStatus = status.toLowerCase();
+  switch (normalizedStatus) {
+    case "preparing":
+      return "bg-orange-50 text-orange-600 border-orange-200";
+    case "ready":
+      return "bg-green-50 text-green-600 border-green-200";
+    case "delivered":
+      return "bg-gray-50 text-gray-600 border-gray-200";
+    case "cancelled":
+      return "bg-red-50 text-red-600 border-red-200";
+    default: // pending, confirmed
+      return "bg-blue-50 text-blue-600 border-blue-200";
+  }
+}
 
 export default function AdminDashboard() {
+  // Using React Query for data fetching with automatic polling
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["admin", "dashboard", "orders"],
+    queryFn: () => ordersApi.getToday(),
+    refetchInterval: 30000, // Poll every 30s
+    staleTime: 10000, // Consider data fresh for 10s
+  });
+
+  // Memoized stats calculation
+  const stats = useMemo(() => {
+    const revenue = orders.reduce((acc, order) => acc + (order.total || 0), 0);
+    const count = orders.length;
+    return {
+      todayRevenue: revenue,
+      todayOrders: count,
+      avgTicket: count > 0 ? revenue / count : 0,
+    };
+  }, [orders]);
+
+  // Memoized recent orders for table
+  const recentOrders = useMemo(() => {
+    return orders.slice(0, 10).map((order) => ({
+      id: order.id.substring(0, 8),
+      customer: order.customerName,
+      total: order.total,
+      status: order.status,
+      time: new Date(order.createdAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    }));
+  }, [orders]);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -61,7 +89,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Vendas Hoje"
-          value={formatCurrency(1250.0)}
+          value={formatCurrency(stats.todayRevenue)}
           change="+12%"
           trend="up"
           icon={DollarSign}
@@ -69,7 +97,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           title="Pedidos"
-          value="45"
+          value={stats.todayOrders.toString()}
           change="+5%"
           trend="up"
           icon={ShoppingBag}
@@ -77,7 +105,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           title="Ticket Médio"
-          value={formatCurrency(27.8)}
+          value={formatCurrency(stats.avgTicket)}
           change="-2%"
           trend="down"
           icon={TrendingUp}
@@ -122,45 +150,61 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
-                {recentOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="hover:bg-[var(--color-secondary)]/30 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-muted-foreground)]">
-                      {order.id}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-[var(--color-foreground)]">
-                      {order.customer}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={cn(
-                          "text-xs font-bold px-2 py-1 rounded-full border",
-                          order.status === "Preparando"
-                            ? "bg-orange-50 text-orange-600 border-orange-200"
-                            : order.status === "Pronto"
-                              ? "bg-green-50 text-green-600 border-green-200"
-                              : "bg-gray-50 text-gray-600 border-gray-200",
-                        )}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm font-medium text-[var(--color-foreground)]">
-                      {formatCurrency(order.total)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-[var(--color-muted-foreground)]"
-                      >
-                        <ArrowRight size={14} />
-                      </Button>
+                {isLoading ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-6 py-8 text-center text-[var(--color-muted-foreground)]"
+                    >
+                      Carregando...
                     </td>
                   </tr>
-                ))}
+                ) : recentOrders.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-6 py-8 text-center text-[var(--color-muted-foreground)]"
+                    >
+                      Nenhum pedido hoje ainda.
+                    </td>
+                  </tr>
+                ) : (
+                  recentOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-[var(--color-secondary)]/30 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-mono text-sm text-[var(--color-muted-foreground)]">
+                        {order.id}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-[var(--color-foreground)]">
+                        {order.customer}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={cn(
+                            "text-xs font-bold px-2 py-1 rounded-full border",
+                            getStatusStyle(order.status),
+                          )}
+                        >
+                          {order.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-sm font-medium text-[var(--color-foreground)]">
+                        {formatCurrency(order.total)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-[var(--color-muted-foreground)]"
+                        >
+                          <ArrowRight size={14} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

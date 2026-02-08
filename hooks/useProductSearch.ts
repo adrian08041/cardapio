@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Product } from "@/types";
 import { FilterState } from "@/components/menu/AdvancedFiltersDrawer";
+import { useProducts } from "@/lib/hooks/use-products";
+import { useCategories } from "@/lib/hooks/use-categories";
+import { Product } from "@/types";
 
 const INITIAL_FILTERS: FilterState = {
   priceRange: [0, 100],
@@ -11,30 +13,39 @@ const INITIAL_FILTERS: FilterState = {
   prepTime: "any",
 };
 
-export function useProductSearch(products: Product[]) {
+export function useProductSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [advancedFilters, setAdvancedFilters] =
     useState<FilterState>(INITIAL_FILTERS);
-  const [isPending, setIsPending] = useState(false);
+
+  // Data Fetching
+  const { data: products = [], isLoading: isLoadingProducts } = useProducts({
+    q: debouncedQuery, // Backend search support
+  });
+
+  const { data: categories = [], isLoading: isLoadingCategories } =
+    useCategories();
 
   // Debounce Logic
   useEffect(() => {
-    setIsPending(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-      setIsPending(false);
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Optimized Filter Logic with Memoization
+  // Client-side Filtering (Refined filters)
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
+
     return products.filter((product) => {
       // 1. Category Filter
-      if (activeCategory !== "all" && product.categoryId !== activeCategory) {
+      // Se tiver category object, usa ID. Se não, tenta fallback ou ignora.
+      const categoryId = product.category?.id;
+      if (activeCategory !== "all" && categoryId !== activeCategory) {
         return false;
       }
 
@@ -71,19 +82,17 @@ export function useProductSearch(products: Product[]) {
         if (advancedFilters.prepTime === "slow" && time <= 30) return false;
       }
 
-      // 3. Text Search Filter (Last for performance)
+      // Text Search Filter (Client-side backup if backend doesn't cover everything)
+      // Como já passamos 'q' pro backend, isso é redundante mas seguro
       if (!debouncedQuery) return true;
 
       const query = debouncedQuery.toLowerCase().trim();
       const matchesName = product.name.toLowerCase().includes(query);
       const matchesDescription = product.description
-        .toLowerCase()
-        .includes(query);
-      const matchesTags = product.tags?.some((tag) =>
-        tag.toLowerCase().includes(query),
-      );
+        ?.toLowerCase()
+        .includes(query); // Adjusted for nullable description
 
-      return matchesName || matchesDescription || matchesTags;
+      return matchesName || matchesDescription;
     });
   }, [products, activeCategory, debouncedQuery, advancedFilters]);
 
@@ -108,7 +117,8 @@ export function useProductSearch(products: Product[]) {
     advancedFilters,
     setAdvancedFilters,
     filteredProducts,
-    isSearching: isPending,
+    isSearching: isLoadingProducts || isLoadingCategories,
+    categories, // Exposing categories to component
     activeFilterCount,
     resetFilters: () => setAdvancedFilters(INITIAL_FILTERS),
   };

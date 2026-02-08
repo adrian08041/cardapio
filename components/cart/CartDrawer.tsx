@@ -6,13 +6,15 @@ import { ShoppingBag, X, Plus, Minus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export function CartDrawer() {
   const { isOpen, toggleCart, items, updateQuantity, getCartTotal } =
     useCartStore();
   const total = getCartTotal();
   const router = useRouter();
+  const params = useParams();
+  const slug = params?.slug as string | undefined;
 
   // Variants para animação do Drawer
   const drawerVariants = {
@@ -27,7 +29,9 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     toggleCart();
-    router.push("/checkout");
+    // Redireciona para a rota do restaurante se tiver slug, senão vai pra checkout global
+    const checkoutPath = slug ? `/r/${slug}/cardapio/checkout` : "/checkout";
+    router.push(checkoutPath);
   };
 
   return (

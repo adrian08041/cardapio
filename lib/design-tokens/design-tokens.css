@@ -1,0 +1,200 @@
+/**
+ * 🎨 FSW Donald's Design System - CSS Variables
+ * 
+ * Gerado automaticamente a partir dos tokens do Figma.
+ * Importe este arquivo no seu globals.css ou layout.tsx
+ * 
+ * @see https://www.figma.com/design/sJtDO8WNiDcehboerUdlRq/FSW-Donald%E2%80%99s
+ */
+
+:root {
+  /* ==========================================
+   * 🔴 PRIMARY COLORS
+   * ========================================== */
+  --color-primary-red: #D90007;
+  --color-primary-red-dark: #B30006;
+  --color-primary-red-light: #FFE5E6;
+
+  /* ==========================================
+   * 🟡 ACCENT COLORS
+   * ========================================== */
+  --color-accent-yellow: #FFC72C;
+  --color-accent-yellow-dark: #E6B326;
+  --color-accent-yellow-light: #FFF4D6;
+
+  /* ==========================================
+   * ⬜ BACKGROUND COLORS
+   * ========================================== */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F4F4F4;
+  --color-bg-tertiary: #F9F9F9;
+
+  /* ==========================================
+   * 📦 SURFACE COLORS
+   * ========================================== */
+  --color-surface-card: #FFFFFF;
+  --color-surface-modal: #FFFFFF;
+  --color-surface-sheet: #FFFFFF;
+
+  /* ==========================================
+   * 📝 TEXT COLORS
+   * ========================================== */
+  --color-text-primary: #000000;
+  --color-text-secondary: #707070;
+  --color-text-tertiary: #9E9E9E;
+  --color-text-on-color: #FFFFFF;
+  --color-text-price: #000000;
+  --color-text-price-promo: #D90007;
+
+  /* ==========================================
+   * 🔲 BORDER COLORS
+   * ========================================== */
+  --color-border-default: #EEEEEE;
+  --color-border-focus: #FFC72C;
+  --color-border-divider: #EEEEEE;
+
+  /* ==========================================
+   * ✅ SEMANTIC COLORS
+   * ========================================== */
+  --color-success: #22C55E;
+  --color-success-light: #DCFCE7;
+  --color-warning: #FFC72C;
+  --color-warning-light: #FEF9C3;
+  --color-error: #D90007;
+  --color-error-light: #FFE5E6;
+  --color-info: #3B82F6;
+  --color-info-light: #DBEAFE;
+
+  /* ==========================================
+   * 🎭 OVERLAY COLORS
+   * ========================================== */
+  --color-overlay-modal: rgba(0, 0, 0, 0.80);
+  --color-overlay-image: rgba(0, 0, 0, 0.40);
+
+  /* ==========================================
+   * 📏 SPACING SCALE
+   * ========================================== */
+  --spacing-none: 0;
+  --spacing-2xs: 0.125rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.25rem;
+  --spacing-2xl: 1.5rem;
+  --spacing-3xl: 2rem;
+  --spacing-4xl: 2.5rem;
+  --spacing-5xl: 3rem;
+  --spacing-6xl: 4rem;
+
+  /* ==========================================
+   * 📱 LAYOUT
+   * ========================================== */
+  --layout-container-padding: 1rem;
+  --layout-container-padding-lg: 1.5rem;
+  --layout-card-gap: 0.75rem;
+  --layout-section-gap: 1.5rem;
+  --layout-touch-target: 2.75rem;
+  --layout-bottom-nav-height: 4rem;
+
+  /* ==========================================
+   * 🔲 BORDER RADIUS
+   * ========================================== */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ==========================================
+   * 🌊 SHADOWS
+   * ========================================== */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.05);
+  --shadow-sheet: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  /* ==========================================
+   * 🔤 TYPOGRAPHY
+   * ========================================== */
+  --font-family-primary: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-numeric: 'Inter', 'Roboto Mono', monospace;
+
+  --font-size-2xs: 0.625rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.25;
+  --line-height-relaxed: 1.5;
+  --line-height-loose: 1.75;
+
+  /* ==========================================
+   * ⏱️ ANIMATIONS
+   * ========================================== */
+  --duration-instant: 75ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-medium: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+
+  --easing-linear: linear;
+  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ==========================================
+   * 📐 Z-INDEX
+   * ========================================== */
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-header: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+}
+
+/* ==========================================
+ * 🌙 DARK MODE (opcional)
+ * ========================================== */
+@media (prefers-color-scheme: dark) {
+  :root.dark {
+    --color-bg-primary: #1A1A1A;
+    --color-bg-secondary: #242424;
+    --color-bg-tertiary: #2D2D2D;
+    
+    --color-surface-card: #242424;
+    --color-surface-modal: #2D2D2D;
+    --color-surface-sheet: #2D2D2D;
+    
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A1A1A1;
+    --color-text-tertiary: #707070;
+    
+    --color-border-default: #3D3D3D;
+    --color-border-divider: #3D3D3D;
+  }
+}

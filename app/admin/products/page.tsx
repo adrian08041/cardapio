@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { products as initialProducts, categories } from "@/data/menu";
-import { Product } from "@/types";
+import { useState, useMemo, useEffect } from "react";
+import { productsApi } from "@/lib/api/products";
+import { categoriesApi } from "@/lib/api/categories";
+import { Product, Category } from "@/types";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,7 +32,25 @@ type SortField = "name" | "price" | "category" | "status";
 type SortOrder = "asc" | "desc";
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [prodData, catData] = await Promise.all([
+        productsApi.getAll(),
+        categoriesApi.getAll(),
+      ]);
+      setProducts(prodData);
+      setCategories(catData);
+    } catch (e) {
+      toast.error("Erro ao carregar dados");
+    }
+  };
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -58,7 +78,7 @@ export default function AdminProductsPage() {
 
     // Category filter
     if (filterCategory !== "all") {
-      result = result.filter((p) => p.categoryId === filterCategory);
+      result = result.filter((p) => p.category?.id === filterCategory);
     }
 
     // Status filter
@@ -83,7 +103,9 @@ export default function AdminProductsPage() {
           comparison = a.price - b.price;
           break;
         case "category":
-          comparison = a.categoryId.localeCompare(b.categoryId);
+          const catA = a.category?.name || "";
+          const catB = b.category?.name || "";
+          comparison = catA.localeCompare(catB);
           break;
         case "status":
           comparison = (a.available ? 1 : 0) - (b.available ? 1 : 0);
@@ -105,10 +127,15 @@ export default function AdminProductsPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
-      setProducts(products.filter((p) => p.id !== id));
-      setSelectedIds(selectedIds.filter((sid) => sid !== id));
+      try {
+        await productsApi.delete(id);
+        toast.success("Produto excluído");
+        loadData();
+      } catch (e) {
+        toast.error("Erro ao excluir");
+      }
     }
   };
 
@@ -122,12 +149,14 @@ export default function AdminProductsPage() {
     setProducts([...products, newProduct]);
   };
 
-  const handleToggleStatus = (id: string) => {
-    setProducts(
-      products.map((p) =>
-        p.id === id ? { ...p, available: !p.available } : p,
-      ),
-    );
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await productsApi.toggleAvailability(id);
+      toast.success("Status alterado");
+      loadData();
+    } catch (e) {
+      toast.error("Erro ao alterar status");
+    }
   };
 
   const handleBulkToggle = (active: boolean) => {
@@ -171,8 +200,18 @@ export default function AdminProductsPage() {
     }
   };
 
-  const getCategoryName = (categoryId: string) => {
-    return categories.find((c) => c.id === categoryId)?.name || "Sem categoria";
+  const getCategoryName = (categoryId?: string) => {
+    // categoryId pode ser undefined no novo type Product se usar obj category
+    // Mas a API response mapProduct normaliza. Se for obj, product.category.name
+    // A funcao de filtro usa p.category?.id se ajustarmos.
+    // Vamos checar o dado.
+    const product = products.find((p) => p.category?.id === categoryId);
+    if (!categoryId) return "Sem categoria";
+    return (
+      categories.find((c) => c.id === categoryId)?.name ||
+      product?.category?.name ||
+      "Sem categoria"
+    );
   };
 
   const handleExportCSV = () => {
@@ -181,7 +220,7 @@ export default function AdminProductsPage() {
       p.id,
       p.name,
       p.price.toString(),
-      getCategoryName(p.categoryId),
+      p.category?.name || "Sem categoria",
       p.available ? "Disponível" : "Indisponível",
       p.sku || "",
     ]);
@@ -198,24 +237,20 @@ export default function AdminProductsPage() {
     link.click();
   };
 
-  const handleSaveProduct = (productData: Partial<Product>) => {
-    if (editingProduct) {
-      // Update
-      setProducts(
-        products.map((p) =>
-          p.id === editingProduct.id
-            ? { ...p, ...productData, updatedAt: new Date().toISOString() }
-            : p,
-        ),
-      );
-    } else {
-      // Create
-      const newProduct: Product = {
-        ...(productData as Product),
-        id: `prod-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
-      setProducts([...products, newProduct]);
+  const handleSaveProduct = async (productData: Partial<Product>) => {
+    try {
+      if (editingProduct) {
+        await productsApi.update(editingProduct.id, productData);
+        toast.success("Produto atualizado");
+      } else {
+        await productsApi.create(productData);
+        toast.success("Produto criado");
+      }
+      loadData();
+      setIsFormOpen(false);
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao salvar produto");
     }
   };
 
@@ -455,7 +490,7 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="p-4">
                   <span className="text-sm text-[var(--color-foreground)]">
-                    {getCategoryName(product.categoryId)}
+                    {product.category?.name || "Sem categoria"}
                   </span>
                 </td>
                 <td className="p-4">

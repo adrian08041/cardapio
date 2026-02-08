@@ -1,8 +1,8 @@
 "use client";
 
+import { memo } from "react";
 import { Category } from "@/types";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 interface CategorySidebarProps {
   categories: Category[];
@@ -10,7 +10,8 @@ interface CategorySidebarProps {
   onSelectCategory: (id: string) => void;
 }
 
-export function CategorySidebar({
+// Pure CSS indicator instead of framer-motion layoutId
+function CategorySidebarComponent({
   categories,
   activeCategory,
   onSelectCategory,
@@ -31,14 +32,15 @@ export function CategorySidebar({
               : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-secondary)] hover:text-[var(--color-foreground)]",
           )}
         >
-          {activeCategory === "all" && (
-            <motion.div
-              layoutId="activeSidebar"
-              className="absolute left-0 w-1 h-6 bg-[var(--color-primary)] rounded-r-full"
-              initial={false}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            />
-          )}
+          {/* CSS-based active indicator instead of framer-motion */}
+          <div
+            className={cn(
+              "absolute left-0 w-1 h-6 bg-[var(--color-primary)] rounded-r-full transition-all duration-200",
+              activeCategory === "all"
+                ? "opacity-100 scale-y-100"
+                : "opacity-0 scale-y-0",
+            )}
+          />
           <span>Todos</span>
         </button>
 
@@ -53,14 +55,15 @@ export function CategorySidebar({
                 : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-secondary)] hover:text-[var(--color-foreground)]",
             )}
           >
-            {activeCategory === category.id && (
-              <motion.div
-                layoutId="activeSidebar"
-                className="absolute left-0 w-1 h-6 bg-[var(--color-primary)] rounded-r-full"
-                initial={false}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-            )}
+            {/* CSS-based active indicator */}
+            <div
+              className={cn(
+                "absolute left-0 w-1 h-6 bg-[var(--color-primary)] rounded-r-full transition-all duration-200",
+                activeCategory === category.id
+                  ? "opacity-100 scale-y-100"
+                  : "opacity-0 scale-y-0",
+              )}
+            />
             <span className="text-base opacity-80 group-hover:opacity-100 transition-opacity">
               {category.icon}
             </span>
@@ -71,3 +74,5 @@ export function CategorySidebar({
     </aside>
   );
 }
+
+export const CategorySidebar = memo(CategorySidebarComponent);
