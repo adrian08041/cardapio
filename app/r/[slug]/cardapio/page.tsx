@@ -7,12 +7,12 @@ import { ProductCard } from "@/components/menu/ProductCard";
 import { CategoryFilters } from "@/components/menu/CategoryFilters";
 import { CategorySidebar } from "@/components/menu/CategorySidebar";
 import { useCartStore } from "@/store/cart";
-import { useRestaurant } from "@/components/restaurant";
 import { useProductSearch } from "@/hooks/useProductSearch";
-import { Search, Loader2, Filter, Sparkles } from "lucide-react";
+import { Search, Loader2, SlidersHorizontal } from "lucide-react";
 import { Product } from "@/types";
+import { RestaurantProfileHeader } from "@/components/restaurant/RestaurantProfileHeader";
 
-// Dynamic imports para reduzir bundle inicial
+// Dynamic imports
 const ProductDetailsModal = dynamic(
   () =>
     import("@/components/menu/ProductDetailsModal").then(
@@ -30,10 +30,8 @@ const AdvancedFiltersDrawer = dynamic(
 );
 
 export default function CardapioPage() {
-  const { restaurant } = useRestaurant();
   const { addItem } = useCartStore();
 
-  // Hook de busca e filtros
   const {
     searchQuery,
     setSearchQuery,
@@ -48,7 +46,6 @@ export default function CardapioPage() {
     categories,
   } = useProductSearch();
 
-  // Modal States
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -68,98 +65,104 @@ export default function CardapioPage() {
 
   return (
     <>
-      {/* Hero Section - Simplificado e Limpo */}
-      <section className="relative bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-        {/* Background Decorativo */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-[var(--color-primary)]/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-10 w-60 h-60 bg-[var(--color-accent)]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 
+        NOVO HEADER: Imagem de Capa + Informações do Restaurante 
+        Inspirado no design do iFood/McDonald's
+      */}
+      <RestaurantProfileHeader />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
-          {/* Título e Descrição */}
-          <div className="max-w-2xl mb-8">
-            <div className="inline-flex items-center gap-2 bg-[var(--color-accent)]/20 text-[var(--color-primary)] px-3 py-1.5 rounded-full text-xs font-bold mb-4">
-              <Sparkles size={14} />
-              CARDÁPIO
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-3">
-              O que vai ser{" "}
-              <span className="text-[var(--color-primary)]">hoje?</span> 🍔
-            </h1>
-
-            <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
-              {restaurant.description ||
-                "Explore nosso cardápio e faça seu pedido!"}
-            </p>
-          </div>
-
-          {/* Barra de Busca */}
-          <div className="flex items-center gap-3 w-full max-w-2xl bg-white p-2 rounded-2xl shadow-lg shadow-black/5 border border-gray-100">
-            <div className="pl-4 text-gray-400">
+      {/* Search & Filters Section (Sticky) */}
+      <div className="sticky top-16 z-30 bg-white border-b border-gray-100 shadow-sm transition-shadow">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-2">
+            {/* Search Input */}
+            <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-xl px-4 h-12 hover:bg-gray-50 transition-colors focus-within:ring-2 focus-within:ring-[var(--color-primary)]/20 focus-within:bg-white">
               {isSearching ? (
-                <Loader2 className="animate-spin" size={22} />
+                <Loader2 className="animate-spin text-gray-400" size={20} />
               ) : (
-                <Search size={22} />
+                <Search size={20} className="text-gray-400 flex-shrink-0" />
               )}
+              <input
+                type="text"
+                placeholder="Buscar no cardápio..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent border-none text-base py-3 focus:ring-0 placeholder:text-gray-400 text-gray-900 outline-none min-w-0"
+              />
             </div>
 
-            <input
-              type="text"
-              placeholder="Buscar pratos, ingredientes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent border-none text-base py-3 focus:ring-0 placeholder:text-gray-400 text-gray-900 outline-none min-w-0"
-            />
-
-            <div className="hidden sm:block w-px h-8 bg-gray-200" />
-
+            {/* Filter Button */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className={`p-3 rounded-xl transition-all font-medium flex items-center gap-2 shrink-0 ${
+              className={`relative min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl transition-all active:scale-95 ${
                 activeFilterCount > 0
                   ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              <Filter size={18} />
-              <span className="hidden sm:inline text-sm">Filtros</span>
+              <SlidersHorizontal size={20} />
               {activeFilterCount > 0 && (
-                <span className="bg-white text-[var(--color-primary)] w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 bg-white text-[var(--color-primary)] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                   {activeFilterCount}
                 </span>
               )}
             </button>
           </div>
-        </div>
-      </section>
 
-      {/* Conteúdo Principal */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+          {/* Category Pills (Mobile Only) */}
+          <div className="mt-3 lg:hidden">
+            <CategoryFilters
+              categories={categories}
+              activeCategory={activeCategory}
+              onSelectCategory={setActiveCategory}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <section className="max-w-7xl mx-auto px-4 py-6 pb-24">
         <div className="flex flex-col lg:flex-row lg:items-start gap-8">
-          {/* Sidebar Desktop */}
+          {/* Sidebar - Desktop Only */}
           <CategorySidebar
             categories={categories}
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
 
+          {/* Products Grid */}
           <div className="flex-1 w-full">
-            {/* Tabs Mobile */}
-            <div className="mb-6 lg:hidden">
-              <CategoryFilters
-                categories={categories}
-                activeCategory={activeCategory}
-                onSelectCategory={setActiveCategory}
-              />
-            </div>
+            {/* Results Header */}
+            {(searchQuery || activeCategory !== "all") && (
+              <div className="flex items-center justify-between mb-4 animate-in fade-in slide-in-from-top-2">
+                <p className="text-sm text-gray-500">
+                  {filteredProducts.length}{" "}
+                  {filteredProducts.length === 1
+                    ? "item encontrado"
+                    : "itens encontrados"}
+                </p>
+                {(searchQuery || activeFilterCount > 0) && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveCategory("all");
+                      resetFilters();
+                    }}
+                    className="text-sm text-[var(--color-primary)] font-medium hover:underline"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+            )}
 
-            {/* Grid de Produtos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product)}
-                  className="h-full cursor-pointer"
+                  className="h-full"
                 >
                   <ProductCard
                     product={product}
@@ -172,16 +175,16 @@ export default function CardapioPage() {
               ))}
             </div>
 
-            {/* Estado Vazio */}
+            {/* Empty State */}
             {filteredProducts.length === 0 && !isSearching && (
-              <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <Search size={32} className="text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-16 text-center animate-in zoom-in-95 duration-300">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                  <Search size={32} className="text-gray-300" />
                 </div>
-                <p className="text-lg font-medium text-gray-700 mb-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
                   Nenhum item encontrado
-                </p>
-                <p className="text-sm text-gray-500 text-center max-w-xs">
+                </h3>
+                <p className="text-sm text-gray-500 max-w-xs mb-6">
                   {searchQuery
                     ? `Não encontramos resultados para "${searchQuery}"`
                     : "Tente selecionar outra categoria ou ajustar os filtros."}
@@ -192,19 +195,19 @@ export default function CardapioPage() {
                     setSearchQuery("");
                     resetFilters();
                   }}
-                  className="mt-4 text-[var(--color-primary)] hover:underline text-sm font-medium"
+                  className="h-12 px-8 bg-[var(--color-primary)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform shadow-lg shadow-[var(--color-primary)]/20"
                 >
-                  Limpar filtros e ver tudo
+                  Ver todos os itens
                 </button>
               </div>
             )}
 
             {/* Loading State */}
             {isSearching && (
-              <div className="flex items-center justify-center py-20">
+              <div className="flex items-center justify-center py-24">
                 <Loader2
                   className="animate-spin text-[var(--color-primary)]"
-                  size={32}
+                  size={40}
                 />
               </div>
             )}
@@ -212,7 +215,7 @@ export default function CardapioPage() {
         </div>
       </section>
 
-      {/* Modais */}
+      {/* Modals */}
       <ProductDetailsModal
         product={selectedProduct}
         isOpen={!!selectedProduct}

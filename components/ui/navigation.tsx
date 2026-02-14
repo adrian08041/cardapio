@@ -17,8 +17,14 @@ export function Navigation() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Hidden on Admin (Admin usually has its own layout) and Checkout
-  if (pathname.startsWith("/admin") || pathname === "/checkout") return null;
+  // Hidden on: Admin, Checkout, and Restaurant pages (which have their own header)
+  if (
+    pathname.startsWith("/admin") ||
+    pathname === "/checkout" ||
+    pathname.startsWith("/r/")
+  ) {
+    return null;
+  }
 
   const navLinks = [
     { href: "/", label: "Cardápio", icon: Home },

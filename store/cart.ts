@@ -2,18 +2,23 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CartItem, Product } from "@/types";
 
+export type OrderType = "DINE_IN" | "TAKEAWAY" | "DELIVERY";
+
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
   couponCode?: string;
   discountAmount: number;
+  orderType?: OrderType;
+  restaurantSlug?: string;
   addItem: (product: Product, quantity?: number, notes?: string) => void;
-  removeItem: (itemId: string, notes?: string) => void; // itemId is product.id
+  removeItem: (itemId: string, notes?: string) => void;
   updateQuantity: (itemId: string, quantity: number, notes?: string) => void;
   clearCart: () => void;
   toggleCart: () => void;
   applyCoupon: (code: string, discount: number) => void;
   removeCoupon: () => void;
+  setOrderType: (type: OrderType, slug?: string) => void;
   getCartTotal: () => number;
   getDiscountedTotal: () => number;
   getCartCount: () => number;
@@ -31,6 +36,11 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       discountAmount: 0,
       couponCode: undefined,
+      orderType: undefined,
+      restaurantSlug: undefined,
+
+      setOrderType: (type, slug) =>
+        set({ orderType: type, restaurantSlug: slug }),
 
       addItem: (product, quantity = 1, notes = "") => {
         const items = get().items;

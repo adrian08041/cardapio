@@ -15,36 +15,50 @@ export function CategoryFilters({
   onSelectCategory,
 }: CategoryFiltersProps) {
   return (
-    <div className="w-full border-b border-[var(--color-border)] mb-6">
-      <div className="flex gap-6 overflow-x-auto no-scrollbar px-1 min-w-max">
+    <div className="w-full overflow-hidden -mx-4 px-4">
+      {/* Scroll Container com safe area */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory">
+        {/* Pill: Todos */}
         <button
           onClick={() => onSelectCategory("all")}
           className={cn(
-            "relative pb-3 text-sm font-medium transition-colors border-b-2",
+            "flex-shrink-0 snap-start",
+            "min-h-[44px] px-4 py-2.5 rounded-full",
+            "text-sm font-semibold transition-all duration-200",
+            "active:scale-95",
             activeCategory === "all"
-              ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-              : "text-[var(--color-muted-foreground)] border-transparent hover:text-[var(--color-foreground)] hover:border-[var(--color-border)]",
+              ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/25"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200",
           )}
         >
           Todos
         </button>
 
+        {/* Pills: Categorias */}
         {categories.map((category) => (
           <button
             key={category.id}
             onClick={() => onSelectCategory(category.id)}
             className={cn(
-              "relative pb-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2",
+              "flex-shrink-0 snap-start",
+              "min-h-[44px] px-4 py-2.5 rounded-full",
+              "text-sm font-semibold transition-all duration-200",
+              "flex items-center gap-2",
+              "active:scale-95",
               activeCategory === category.id
-                ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                : "text-[var(--color-muted-foreground)] border-transparent hover:text-[var(--color-foreground)] hover:border-[var(--color-border)]",
+                ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/25"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200",
             )}
           >
-            {/* Keeping category icon if available, but styling it subtly */}
-            <span className="text-base opacity-80">{category.icon}</span>
-            {category.name}
+            {category.icon && (
+              <span className="text-base">{category.icon}</span>
+            )}
+            <span className="whitespace-nowrap">{category.name}</span>
           </button>
         ))}
+
+        {/* Spacer para garantir scroll até o último item */}
+        <div className="flex-shrink-0 w-4" aria-hidden="true" />
       </div>
     </div>
   );

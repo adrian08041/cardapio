@@ -82,7 +82,10 @@ const MOCK_ORDERS: Order[] = [
 ];
 
 export default function KDSPage() {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<KDSSettings>({
     station: "all",
@@ -91,7 +94,47 @@ export default function KDSPage() {
     columns: 3,
   });
 
-  // Auto-refresh timer for elapsed time calculation across all children
+  // Fetch orders function
+  const fetchOrders = async () => {
+    try {
+      const { ordersApi } = await import("@/lib/api/orders");
+      // Buscar apenas pedidos ativos (pending/preparing/ready)
+      // Como a API getAll retorna tudo, filtramos aqui ou no backend.
+      // Idealmente: ordersApi.getActive()
+      const allOrders = await ordersApi.getAll();
+
+      // Filtrar apenas pedidos ativos para o KDS
+      const activeOrders = allOrders.filter(
+        (o) =>
+          o.status === "pending" ||
+          o.status === "preparing" ||
+          o.status === "ready",
+      );
+
+      // Sort by creation time (older first)
+      const sortedOrders = activeOrders.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+
+      setOrders(sortedOrders);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+      setError("Erro ao carregar pedidos. Tentando novamente...");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load + Polling
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 10000); // Poll every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-refresh timer for elapsed time calculation
   const [, setTick] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => setTick((t) => t + 1), 30000);
@@ -102,18 +145,25 @@ export default function KDSPage() {
   const filteredOrders = useMemo(() => {
     return orders
       .map((order) => {
+        // Normalize items with default station if missing
+        const itemsWithStation = order.items.map((item) => ({
+          ...item,
+          station: item.station || "kitchen", // Default to kitchen
+        }));
+
         // 1. If viewing ALL, show everything
-        if (settings.station === "all") return order;
+        if (settings.station === "all")
+          return { ...order, items: itemsWithStation };
 
         // 2. Filter items relevant to this station
-        const relevantItems = order.items.filter(
-          (item) => item.station === settings.station || !item.station, // Show undefined station items just in case
+        const relevantItems = itemsWithStation.filter(
+          (item) => item.station === settings.station,
         );
 
-        // 3. If no items for this station, return null (filter out later)
+        // 3. If no items for this station, return null
         if (relevantItems.length === 0) return null;
 
-        // 4. Return new order object with ONLY relevant items displayed
+        // 4. Return new order with ONLY relevant items
         return {
           ...order,
           items: relevantItems,
@@ -128,15 +178,40 @@ export default function KDSPage() {
   );
   const readyOrders = filteredOrders.filter((o) => o.status === "ready");
 
-  const advanceStatus = (orderId: string) => {
+  const advanceStatus = async (orderId: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+
+    let nextStatus: "preparing" | "ready" | "delivered" | null = null;
+    let action: "prepare" | "ready" | "deliver" | null = null;
+
+    if (order.status === "pending") {
+      nextStatus = "preparing";
+      action = "prepare";
+    } else if (order.status === "preparing") {
+      nextStatus = "ready";
+      action = "ready";
+    } else if (order.status === "ready") {
+      nextStatus = "delivered";
+      action = "deliver";
+    }
+
+    if (!nextStatus || !action) return;
+
+    // Optimistic update
     setOrders((prev) =>
-      prev.map((o) => {
-        if (o.id !== orderId) return o;
-        if (o.status === "pending") return { ...o, status: "preparing" };
-        if (o.status === "preparing") return { ...o, status: "ready" };
-        return o; // Ready stays ready or moves to archive (not implemented)
-      }),
+      prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus! } : o)),
     );
+
+    try {
+      const { ordersApi } = await import("@/lib/api/orders");
+      await ordersApi.updateStatusHelper(orderId, action);
+      // No need to refetch immediately, polling will catch up or consistency is maintained
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      // Revert on error
+      fetchOrders();
+    }
   };
 
   return (
@@ -151,6 +226,32 @@ export default function KDSPage() {
           {/* Secret settings button overlay on top-right */}
         </button>
       </div>
+
+      {loading && orders.length === 0 && (
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="animate-spin h-8 w-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full mr-3"></div>
+          Carregando pedidos...
+        </div>
+      )}
+
+      {error && (
+        <div
+          className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4 flex flex-col gap-2"
+          role="alert"
+        >
+          <p className="font-bold">Erro de Conexão: {error}</p>
+          {(error.includes("403") || error.includes("401")) && (
+            <button
+              onClick={() =>
+                (window.location.href = "/auth/login?redirect=/kds")
+              }
+              className="mt-2 bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 w-fit"
+            >
+              Fazer Login
+            </button>
+          )}
+        </div>
+      )}
 
       <div
         className={`flex-1 grid grid-cols-${settings.columns} gap-4 p-4 h-full bg-[var(--color-background)]`}

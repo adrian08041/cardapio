@@ -1,16 +1,6 @@
-"use client";
-
-import { useParams, notFound } from "next/navigation";
-import { RestaurantProvider, RestaurantHeader } from "@/components/restaurant";
+import { notFound } from "next/navigation";
 import { Restaurant } from "@/types/restaurant";
-import { Loader2 } from "lucide-react";
-import dynamic from "next/dynamic";
-
-// Dynamic import do CartDrawer para não carregar até precisar
-const CartDrawer = dynamic(
-  () => import("@/components/cart/CartDrawer").then((mod) => mod.CartDrawer),
-  { ssr: false },
-);
+import { RestaurantLayoutClient } from "@/components/restaurant/RestaurantLayoutClient";
 
 // TODO: Substituir por chamada real à API quando backend estiver pronto
 // Por enquanto, usando dados mock para desenvolvimento
@@ -21,9 +11,9 @@ const MOCK_RESTAURANTS: Record<string, Restaurant> = {
     name: "FSW Donald's",
     description:
       "Hambúrgueres artesanais, acompanhamentos crocantes e bebidas geladas.",
-    logo: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop",
+    logo: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
     banner:
-      "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=1200&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80",
     phone: "(11) 99999-9999",
     whatsapp: "5511999999999",
     isOpen: true,
@@ -74,7 +64,7 @@ const MOCK_RESTAURANTS: Record<string, Restaurant> = {
 
 async function getRestaurant(slug: string): Promise<Restaurant | null> {
   // TODO: Implementar chamada real à API
-  // const response = await fetch(`/api/v1/restaurants/slug/${slug}`);
+  // const response = await fetch(`${process.env.API_URL}/api/v1/restaurants/slug/${slug}`);
   // if (!response.ok) return null;
   // return response.json();
 
@@ -99,21 +89,8 @@ export default async function RestaurantLayout({
   }
 
   return (
-    <RestaurantProvider restaurant={restaurant}>
-      <div
-        className="min-h-screen bg-[var(--color-background)]"
-        style={
-          {
-            // Aplica tema do restaurante via CSS variables
-            "--color-primary": restaurant.theme?.primaryColor || "#D90007",
-            "--color-accent": restaurant.theme?.accentColor || "#FFC72C",
-          } as React.CSSProperties
-        }
-      >
-        <RestaurantHeader />
-        <main>{children}</main>
-        <CartDrawer />
-      </div>
-    </RestaurantProvider>
+    <RestaurantLayoutClient restaurant={restaurant}>
+      {children}
+    </RestaurantLayoutClient>
   );
 }
